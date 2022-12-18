@@ -7,6 +7,7 @@ const Products = lazy(() => import("../components/checkout/Products"));
 const ProcessingProducts = lazy(() =>
   import("../components/checkout/CheckoutProcessing")
 );
+const PageNotFound = lazy(() => import("../components/error/Error404"));
 
 const routes = [
   {
@@ -35,6 +36,19 @@ const routes = [
   },
 ];
 
-var allRoutes = [...routes];
+const errorRoutes = [
+  {
+    path: "*",
+    name: "Error - 404",
+    element: PageNotFound,
+    roles: [],
+    exact: true,
+    isAnonymous: true,
+  },
+];
+
+var allRoutes = [
+  ...routes,
+  ...errorRoutes,];
 
 export default allRoutes;
