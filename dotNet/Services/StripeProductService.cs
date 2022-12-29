@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Authorization;
 using Sabio.Data;
 using Sabio.Data.Providers;
 using Sabio.Models.Domain;
@@ -35,6 +36,24 @@ namespace Sabio.Services
                 singleRecordMapper: delegate (IDataReader reader, short set)
                 {
                     product = StripeProductMapper(reader);
+                });
+            return product;
+        }
+
+        public LookUp GetCurrentSubscription(int userId)
+        {
+            string procName = "[dbo].[StripeSubscriptions_SelectByUserId]";
+            LookUp product = new LookUp();
+            int startingIndex = 0;
+            _data.ExecuteCmd(procName,
+                inputParamMapper: delegate (SqlParameterCollection parameterCollection)
+                {
+                    parameterCollection.AddWithValue("@UserId", userId);
+                },
+                singleRecordMapper: delegate (IDataReader reader, short set)
+                {
+                    product.Id = reader.GetSafeInt32(startingIndex++);
+                    product.Name = reader.GetString(startingIndex++);
                 });
             return product;
         }

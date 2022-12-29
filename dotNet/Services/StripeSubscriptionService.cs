@@ -17,6 +17,8 @@ using Stripe.BillingPortal;
 using Stripe.Checkout;
 using SessionService = Stripe.Checkout.SessionService;
 using Session = Stripe.Checkout.Session;
+using Amazon.Runtime.Internal;
+using Sabio.Data;
 
 namespace Sabio.Services
 {
@@ -59,8 +61,61 @@ namespace Sabio.Services
             var invoiceService = new InvoiceService();
             var invoiceId = subscriptionDetail.LatestInvoiceId;
             var invoice = invoiceService.Get(invoiceId);
+            var invoiceStart = invoice.Lines.Data[0].Period.Start;
+            var invoiceEnd = invoice.Lines.Data[0].Period.End;
+            var customerId = subscriptionDetail.CustomerId;
+
+            string procName = "[dbo].[StripeInvoices_Insert]";
+            _data.ExecuteNonQuery(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+                    AddSingleInvoice(col, invoiceStart, invoiceEnd, customerId);
+
+                    SqlParameter idOut = new SqlParameter("@Id", SqlDbType.Int);
+                    idOut.Direction = ParameterDirection.Output;
+                    col.Add(idOut);
+                });
+
             return invoice.InvoicePdf;
         }
+
+        public StripeInvoicePeriod GetInvoicePeriod(int userId)
+        {
+            string procName = "[dbo].[StripeInvoices_SelectById]";
+            StripeInvoicePeriod period = new StripeInvoicePeriod();
+            int startingIndex = 0;
+            _data.ExecuteCmd(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+                    col.AddWithValue("@UserId", userId);
+                },
+                singleRecordMapper: delegate (IDataReader reader, short set)
+                {
+                    startingIndex = MapSingleInvoice(reader, period, startingIndex);
+                });
+            return period;
+        }
+
+        public StripeSubscribedCustomer GetInvoice(int userId)
+        {
+            string procName = "[dbo].[StripeSubscriptions_SelectByUserIdV2]";
+            StripeSubscribedCustomer subscription = new StripeSubscribedCustomer();
+            int startingIndex = 0;
+
+            _data.ExecuteCmd(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+                    col.AddWithValue("@UserId", userId);
+                },
+                singleRecordMapper: delegate (IDataReader reader, short set)
+                {
+                    subscription.SubscriptionId = reader.GetSafeString(startingIndex++);
+                    subscription.CustomerId = reader.GetSafeString(startingIndex++);
+                });
+
+            return subscription;
+        }
+
 
         public StripePayload GetSubscriptionDetail(string sessionId, int userId)
         {
@@ -125,6 +180,20 @@ namespace Sabio.Services
             col.AddWithValue("@DateCreated", model.DateCreated);
             col.AddWithValue("@Status", model.Status);
             col.AddWithValue("@PriceId", model.PriceId);
+        }
+
+        private static void AddSingleInvoice(SqlParameterCollection col, DateTime invoiceStart, DateTime invoiceEnd, string customerId)
+        {
+            col.AddWithValue("@CustomerId", customerId);
+            col.AddWithValue("@InvoiceStart", invoiceStart);
+            col.AddWithValue("@InvoiceEnd", invoiceEnd);
+        }
+
+        private static int MapSingleInvoice(IDataReader reader, StripeInvoicePeriod period, int startingIndex)
+        {
+            period.InvoiceStart = reader.GetSafeDateTime(startingIndex++);
+            period.InvoiceEnd = reader.GetSafeDateTime(startingIndex++);
+            return startingIndex;
         }
     }
 
