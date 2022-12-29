@@ -14,4 +14,15 @@ const GetProductById = (id) => {
   return axios(config);
 };
 
-export { GetProductById };
+const GetCurrentSubscription = () => {
+  const config = {
+    method: "GET",
+    url: endpoint + "/api/product/current",
+    withCredentials: true,
+    crossdomain: true,
+    headers: { "Content-Type": "application/json" },
+  };
+  return axios(config);
+};
+
+export { GetProductById, GetCurrentSubscription };

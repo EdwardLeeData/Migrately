@@ -49,9 +49,21 @@ const GetPayloads = (sessionId) => {
   return axios(config);
 };
 
+const GetInvoicePeriods = (id) => {
+  const config = {
+    method: "GET",
+    url: endpoint + `/api/subscription/invoice/${id}`,
+    withCredentials: true,
+    crossdomain: true,
+    headers: { "Content-Type": "application/json" },
+  };
+  return axios(config);
+};
+
 export {
   PostSubscriptionData,
   CreateInvoicePdf,
   GetSubscriptionDetails,
   GetPayloads,
+  GetInvoicePeriods,
 };
