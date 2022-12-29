@@ -5,9 +5,10 @@ import PropTypes from "prop-types";
 import PriceOdometer from "./PriceOdometer";
 import debug from "sabio-debug";
 import { loadStripe } from "@stripe/stripe-js";
-import Toastr from "toastr";
+import Swal from "sweetalert2";
+import { RightCornerRibbon } from "react-ribbons";
 import * as checkoutService from "../../services/checkoutService";
-import * as ProductService from "../../services/productService";
+import * as productService from "../../services/productService";
 
 const ProductCard = ({ content, isPricingMode, currentUser, customer }) => {
   const _logger = debug.extend("ProductCard");
@@ -20,19 +21,24 @@ const ProductCard = ({ content, isPricingMode, currentUser, customer }) => {
     productId: "",
     term: "",
   });
+  const [currentPlan, setCurrentPlan] = useState({
+    id: 0,
+    name: "",
+  });
 
   let plan = content;
 
   useEffect(() => {
     const contentId = isPricingMode ? content.id + 1 : content.id;
-    ProductService.GetProductById(contentId)
+    _logger("cId", contentId);
+    productService
+      .GetProductById(contentId)
       .then(onGetProductDetailSuccess)
-      .catch(onGetProductDetailError);
+      .catch(onGetDetailError);
   }, [isPricingMode]);
 
   const onGetProductDetailSuccess = (response) => {
     const product = response.data.item;
-
     setProductDetail((prevState) => {
       const pd = { ...prevState };
       pd.amount = product.amount;
@@ -43,13 +49,23 @@ const ProductCard = ({ content, isPricingMode, currentUser, customer }) => {
       pd.term = product.term;
       return pd;
     });
+    productService
+      .GetCurrentSubscription()
+      .then(onGetCurrentSubscriptionSuccess)
+      .catch(onGetDetailError);
   };
-  const onGetProductDetailError = (error) => {
+  const onGetCurrentSubscriptionSuccess = (response) => {
+    const subscriptionObj = response.data.item;
+    _logger(subscriptionObj);
+    setCurrentPlan((prevState) => {
+      const pd = { ...prevState };
+      pd.id = subscriptionObj.id;
+      pd.name = subscriptionObj.name;
+      return pd;
+    });
+  };
+  const onGetDetailError = (error) => {
     _logger(error);
-    Toastr.error(
-      "Unable to display product details",
-      "Please refresh the page"
-    );
   };
 
   const onButtonClick = (e) => {
@@ -75,24 +91,32 @@ const ProductCard = ({ content, isPricingMode, currentUser, customer }) => {
   };
   const onCreateCheckoutSessionError = (error) => {
     _logger(error);
-    Toastr.error("Error Creating Checkout Session", "Error");
+    Swal.fire("Please Login");
   };
 
   return (
     <Card className="border-0 mb-3">
+      {currentPlan.name === productDetail.name ? (
+        <RightCornerRibbon
+          backgroundColor="#cc0000"
+          color="#f0f0f0"
+          fontFamily="Arial"
+        >
+          CURRENT
+        </RightCornerRibbon>
+      ) : (
+        ""
+      )}
+
       <Card.Body className="p-0">
         <div className="p-5 text-center">
           <Image src="" alt="" className="mb-5" />
           <div className="mb-5">
             <h2 className="fw-bold">{productDetail.name}</h2>
-            <p
-              className="mb-0"
-              dangerouslySetInnerHTML={{ __html: plan.description }}
-            ></p>
           </div>
           <div className="d-flex justify-content-center mb-4">
             <span className="h3 mb-0 fw-bold">$</span>
-            <PriceOdometer value={productDetail.amount} />
+            <PriceOdometer value={productDetail?.amount} />
             <span className="align-self-end mb-1 ms-2 toggle-price-content">
               /{isPricingMode ? "Yearly" : "Monthly"}
             </span>
@@ -106,7 +130,11 @@ const ProductCard = ({ content, isPricingMode, currentUser, customer }) => {
                 plan.buttonClass ? plan.buttonClass : "outline-primary"
               }`}
             >
-              {plan.buttonText}
+              {currentPlan.name === productDetail.name
+                ? "Your Plan"
+                : currentPlan.name
+                ? "Change to this Plan"
+                : plan.buttonText}
             </Link>
           </div>
         </div>
@@ -176,4 +204,5 @@ ProductCard.propTypes = {
     lastName: PropTypes.string,
   }).isRequired,
 };
+
 export default ProductCard;

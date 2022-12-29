@@ -6,26 +6,65 @@ import { essential, standard, premium } from "./pricingPlansData";
 import ProductFeatures from "./productFeatures";
 import PropTypes from "prop-types";
 import userService from "../../services/userService";
+import * as subscriptionService from "../../services/stripeSubscriptionService";
 import debug from "sabio-debug";
-import Toastr from "toastr";
 
 const Products = ({ currentUser }) => {
   const _logger = debug.extend("Products");
-
   const [pricing, togglePricing] = useToggle(true);
   const [customer, setCustomer] = useState({
     firstName: "",
     lastName: "",
   });
+  const [invoicePeriod, setInvoicePeriod] = useState({
+    start: "",
+    end: "",
+    term: 0,
+  });
+
   useEffect(() => {
     userService
       .getUserById(currentUser.id)
       .then(onGetUserByIdSuccess)
       .catch(onGetUserByIdError);
+    subscriptionService
+      .GetInvoicePeriods(currentUser.id)
+      .then(onGetInvoicePeriodSuccess)
+      .catch(onGetInvoicePeriodError);
   }, []);
+
+  const onGetInvoicePeriodSuccess = (response) => {
+    _logger("invoice periods", response);
+    const invoiceStartRaw = new Date(response.data.item.invoiceStart);
+    const invoiceEndRaw = new Date(response.data.item.invoiceEnd);
+    const invoiceStart = invoiceStartRaw
+      .toDateString()
+      .substring(invoiceStartRaw.toDateString().indexOf(" ") + 1);
+
+    const invoiceEnd = invoiceEndRaw
+      .toDateString()
+      .substring(invoiceEndRaw.toDateString().indexOf(" ") + 1);
+
+    const term =
+      (invoiceEndRaw.getTime() - invoiceStartRaw.getTime()) /
+      (1000 * 3600 * 24);
+
+    setInvoicePeriod((prevState) => {
+      const pd = { ...prevState };
+      pd.start = invoiceStart;
+      pd.end = invoiceEnd;
+      pd.term = term;
+      return pd;
+    });
+  };
+
+  const onGetInvoicePeriodError = (error) => {
+    _logger("invoice periods error", error);
+  };
+
   const onGetUserByIdSuccess = (response) => {
-    _logger("onGetUserByIdSuccess", response.data.item);
     const userObj = response.data.item;
+    _logger(userObj);
     setCustomer((prevState) => {
       const pd = { ...prevState };
       pd.firstName = userObj.firstName;
@@ -33,10 +72,11 @@ const Products = ({ currentUser }) => {
       return pd;
     });
   };
+
   const onGetUserByIdError = (error) => {
-    _logger("onGetUserByIdError", error);
-    Toastr.error("Please Log In");
+    _logger(error);
   };
+
   const mapFeatures = (aProduct) => {
     return (
       <Col lg={4} md={6} sm={12} className="mb-3" key={aProduct.id}>
@@ -85,6 +125,19 @@ const Products = ({ currentUser }) => {
                     />
                   </Form>
                   <span className="text-white me-2">Yearly</span>
+                </div>
+                <div className="mt-4">
+                  {invoicePeriod?.term === 0 ? (
+                    ""
+                  ) : invoicePeriod?.term > 31 ? (
+                    <div>
+                      <h4 className="text-white me-2">{`Next yearly plan will be on ${invoicePeriod.end}`}</h4>
+                    </div>
+                  ) : (
+                    <div>
+                      <h4 className="text-white me-2">{`Next monthly plan payment will be on ${invoicePeriod.end}`}</h4>
+                    </div>
+                  )}
                 </div>
               </div>
             </Col>

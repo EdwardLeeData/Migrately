@@ -3,7 +3,6 @@ export const essential = {
   image:
     "https://www.awilsonsocialwork.net/wp-content/uploads/2017/01/placeholder.jpg",
   plantitle: "Essential",
-  description: `Description`,
   buttonText: "Get Started",
   buttonClass: "outline-primary",
   featureHeading: "This plan includes:",
@@ -27,7 +26,6 @@ export const standard = {
   image:
     "https://www.awilsonsocialwork.net/wp-content/uploads/2017/01/placeholder.jpg",
   plantitle: "Standard",
-  description: `Description`,
   buttonText: "Get Started",
   buttonClass: "primary",
   featureHeading: "This plan includes:",
@@ -51,7 +49,6 @@ export const premium = {
   image:
     "https://www.awilsonsocialwork.net/wp-content/uploads/2017/01/placeholder.jpg",
   plantitle: "Premium",
-  description: `Description`,
   buttonText: "Get Started",
   buttonClass: "outline-primary",
   featureHeading: "This plan includes:",
