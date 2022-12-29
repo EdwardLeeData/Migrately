@@ -33,15 +33,6 @@ namespace Sabio.Web.StartUp
             services.AddSingleton<IConfiguration>(configuration);   // IConfiguration explicitly
 
             string connString = configuration.GetConnectionString("Default");
-            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.2
-            // The are a number of differe Add* methods you can use. Please verify which one you
-            // should be using services.AddScoped<IMyDependency, MyDependency>();
-
-            // services.AddTransient<IOperationTransient, Operation>();
-
-            // services.AddScoped<IOperationScoped, Operation>();
-
-            // services.AddSingleton<IOperationSingleton, Operation>();
 
             services.AddSingleton<IAuthenticationService<int>, WebAuthenticationService>();
 
@@ -66,8 +57,6 @@ namespace Sabio.Web.StartUp
             {
                 IConfigureDependencyInjection idi = Activator.CreateInstance(tt) as IConfigureDependencyInjection;
 
-                //This will not error by way of being null. BUT if the code within the method does
-                // then we would rather have the error loadly on startup then worry about debuging the issues as it runs
                 idi.ConfigureServices(services, configuration);
             });
         }
