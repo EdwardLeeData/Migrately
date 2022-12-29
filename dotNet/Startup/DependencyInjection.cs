@@ -56,37 +56,11 @@ namespace Sabio.Web.StartUp
             );
 
             services.AddSingleton<ICheckoutService, CheckoutService>();
-            services.AddSingleton<ICommentService, CommentService>();
-            services.AddSingleton<IDictionary<string, UserConnection>>(opts => new Dictionary<string, UserConnection>());
-            services.AddSingleton<IEmailService, EmailService>();
-            services.AddSingleton<IFAQService, FAQService>();
-
-            services.AddSingleton<IForumCategoryService, ForumCategoryService>();
-            services.AddSingleton<IForumMemberService, ForumMemberService>();
-            services.AddSingleton<IForumService, ForumService>();
-
-            services.AddSingleton<IFilesService, FilesService>();
-
-            services.AddSingleton<IGoogleAnalyticService, GoogleAnalyticService>();
-
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<IIdentityProvider<int>, WebAuthenticationService>();
-            services.AddSingleton<IImmigrantVisaCategoryService, ImmigrantVisaCategoryService>();
-            services.AddSingleton<ILocationService, LocationService>();
-            services.AddSingleton<ILookUpService, LookUpService>();
-            services.AddSingleton<IMessageService, MessageService>();
-            services.AddSingleton<INewsletterSubscriptionService, NewsletterSubscriptionService>();
-            services.AddSingleton<INonImmigrantVisasService, NonImmigrantVisasService>();
             services.AddSingleton<IPaymentAccountService, PaymentAccountService>();
-            services.AddSingleton<IProcessingTimeService, ProcessingTimeService>();
-            services.AddSingleton<IResourceService, ResourceService>();           
-            services.AddSingleton<ISiteReferenceService, SiteReferenceService>();
             services.AddSingleton<IStripeProductService, StripeProductService>();
             services.AddSingleton<IStripeSubscriptionService, StripeSubscriptionService>();
             services.AddSingleton<ISurveyService, SurveyService>();
-            services.AddSingleton<IUSCISFormsService, USCISFormsService>();
-            services.AddSingleton<IUserService, UserService>();
-            services.AddSingleton<IVideochatService, VideochatService>();
+
 
             GetAllEntities().ForEach(tt =>
             {
