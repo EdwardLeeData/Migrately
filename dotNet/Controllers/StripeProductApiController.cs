@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,7 @@ namespace Sabio.Web.Api.Controllers
 
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public ActionResult<ItemResponse<StripeProduct>> Get(int id)
         {
@@ -49,6 +51,35 @@ namespace Sabio.Web.Api.Controllers
                 else
                 {
                     response = new ItemResponse<StripeProduct> { Item = product };
+                }
+            }
+            catch (Exception e)
+            {
+                code = 500;
+                Logger.LogError(e.ToString());
+                response = new ErrorResponse(e.Message);
+            }
+            return StatusCode(code, response);
+        }
+
+        [HttpGet("current")]
+        public ActionResult<ItemResponse<LookUp>> Get()
+        {
+            int code = 200;
+            BaseResponse response = null;
+            StripeConfiguration.ApiKey = _stripe.StripeKey;
+            try
+            {
+                int userId = _authService.GetCurrentUserId();
+                LookUp product = _service.GetCurrentSubscription(77);
+                if (product == null)
+                {
+                    code = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<LookUp> { Item = product };
                 }
             }
             catch (Exception e)

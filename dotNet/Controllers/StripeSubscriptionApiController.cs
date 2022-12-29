@@ -96,5 +96,54 @@ namespace Sabio.Web.Api.Controllers
             }
             return StatusCode(code, response);
         }
+
+        [HttpGet("invoice/{id:int}")]
+        public ActionResult<ItemResponse<StripeInvoicePeriod>> Get(int id)
+        {
+            int code = 200;
+            BaseResponse response = null;
+            StripeConfiguration.ApiKey = _stripe.StripeKey;
+            try
+            {
+                var period = _service.GetInvoicePeriod(id);
+                response = new ItemResponse<StripeInvoicePeriod>() { Item = period };
+            }
+            catch (Exception e)
+            {
+                code = 500;
+                Logger.LogError(e.ToString());
+                response = new ErrorResponse(e.Message);
+            }
+            return StatusCode(code, response);
+        }
+
+        [HttpGet("invoice/current/{id:int}")]
+        public ActionResult<ItemResponse<StripeSubscribedCustomer>> GetInvoice(int id)
+        {
+            int code = 200;
+            BaseResponse response = null;
+            StripeConfiguration.ApiKey = _stripe.StripeKey;
+            try
+            {
+                var subscription = _service.GetInvoice(id);
+                if (subscription == null)
+                {
+                    code = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<StripeSubscribedCustomer>() { Item = subscription };
+
+                }
+            }
+            catch (Exception e)
+            {
+                code = 500;
+                Logger.LogError(e.ToString());
+                response = new ErrorResponse(e.Message);
+            }
+            return StatusCode(code, response);
+        }
     }
 }
