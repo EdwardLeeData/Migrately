@@ -6,5 +6,6 @@ namespace Sabio.Services.Interfaces
     public interface IStripeProductService
     {
         StripeProduct GetById(int id);
+        LookUp GetCurrentSubscription(int userId);
     }
 }
