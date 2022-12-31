@@ -9,3 +9,6 @@ Migrately is an MVP and due to the proprietary nature of the code I can only pro
 <br/>
 <h1>Page Overview (User Not Logged In)</h1>
 <img src="https://github.com/EdwardLeeData/Migrately/blob/main/demo_user_not_loggedin.gif"/>
+
+<br/>
+<h1> User Logged In </h1>
