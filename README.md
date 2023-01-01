@@ -10,7 +10,7 @@ Migrately is an MVP and due to the proprietary nature of the code I can only pro
 <br/>
 <h1>User Not Logged In</h1>
 <img src="https://github.com/EdwardLeeData/Migrately/blob/main/gif/userNotLoggedIn.gif"/>
-<p>SweetAlert2 to display "Please Log In" in order to proceed to checkout page</p>
+<li>SweetAlert2 to display "Please Log In" in order to proceed to checkout page</li>
 
 <br/>
 <h1>User Logged In User</h1>
